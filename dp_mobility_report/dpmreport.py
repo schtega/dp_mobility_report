@@ -34,7 +34,7 @@ class DpMobilityReport:
         analysis_exclusion: Ignored, if ``analysis_selection`` is set! ``analysis_exclusion`` takes a list of all analyses to be excluded. Either entire segments can be excluded: ``const.OVERVIEW``, ``const.PLACE_ANALYSIS``, ``const.OD_ANALYSIS``, ``const.USER_ANALYSIS`` or any single analysis can be excluded: ``const.DS_STATISTICS``, ``const.MISSING_VALUES``, ``const.TRIPS_OVER_TIME``, ``const.TRIPS_PER_WEEKDAY``, ``const.TRIPS_PER_HOUR``, ``const.VISITS_PER_TILE``, ``const.VISITS_PER_TIME_TILE``, ``const.OD_FLOWS``, ``const.TRAVEL_TIME``, ``const.JUMP_LENGTH``, ``const.TRIPS_PER_USER``, ``const.USER_TIME_DELTA``, ``const.RADIUS_OF_GYRATION``, ``const.USER_TILE_COUNT``, ``const.MOBILITY_ENTROPY``
         budget_split: ``dict`` to customize how much privacy budget is assigned to which analysis. Each key needs to be named according to an analysis and the value needs to be an integer indicating the weight for the privacy budget. If no weight is assigned, a default weight of 1 is set. For example, if ``budget_split = {const.VISITS_PER_TILE: 10}``, then the privacy budget for ``visits_per_tile`` is 10 times higher than for every other analysis, which all get a default weight of 1. Possible ``dict`` keys (all analyses): ``const.DS_STATISTICS``, ``const.MISSING_VALUES``, ``const.TRIPS_OVER_TIME``, ``const.TRIPS_PER_WEEKDAY``, ``const.TRIPS_PER_HOUR``, ``const.VISITS_PER_TILE``, ``const.VISITS_PER_TIME_TILE``, ``const.OD_FLOWS``, ``const.TRAVEL_TIME``, ``const.JUMP_LENGTH``, ``const.TRIPS_PER_USER``, ``const.USER_TIME_DELTA``, ``const.RADIUS_OF_GYRATION``, ``const.USER_TILE_COUNT``, ``const.MOBILITY_ENTROPY``
         timewindows: List of hours as ``int`` that define the timewindows for the spatial analysis for single time windows. Defaults to ``[2, 6, 10, 14, 18, 22]``.
-        max_travel_time: Upper bound for travel time histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
+        max_travel_time: Upper bound for travel time histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``
         bin_range_travel_time: The range a single histogram bin spans for travel time (e.g., 5 for 5 min bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
         max_jump_length: Upper bound for jump length histogram. If ``None`` is given, no upper bound is set. Defaults to ``None``.
         bin_range_jump_length: The range a single histogram bin spans for jump length (e.g., 1 for 1 km bins). If ``None`` is given, the histogram bins will be determined automatically. Defaults to ``None``.
@@ -47,7 +47,9 @@ class DpMobilityReport:
         subtitle: Custom subtitle that appears at the top of the HTML report. Defaults to ``None``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
-        evalu: Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
+        evalu: Parameter only needed for development and evaluation purposes. Defaults to ``False``.
+        gaussian: Whether the Gaussian Mechanism should be applied instead of LaPlace. Defaults to ``False``.
+        delta: The probability of failing to achieve epsilon-dp. Only needed if Gaussian Mechanism is chosen. Has to be of type float and in range (0,1].  Defaults to ``None``. i.e. standard Noise Mechanisms are used"""
 
     _report: dict = {}
     _html: str = ""
@@ -83,6 +85,8 @@ class DpMobilityReport:
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
+        gaussian: bool = False,
+        delta: Union[float, None] = None
     ) -> None:
         preprocessing.validate_input(
             df,
@@ -107,6 +111,8 @@ class DpMobilityReport:
             max_user_time_delta,
             bin_range_user_time_delta,
             seed_sampling,
+            gaussian,
+            delta
         )
 
         (
@@ -131,14 +137,14 @@ class DpMobilityReport:
             self._max_trips_per_user = (
                 max_trips_per_user
                 if max_trips_per_user is not None
-                else df.groupby(const.UID).nunique()[const.TID].max()
+                else df.groupby(const.UID).nunique()[const.TID].max()  ## if max_trips_per_user is none get actually max trips one single user contributed
             )
 
             if user_privacy:
                 self.count_sensitivity_base = self._max_trips_per_user
             else:
-                self.count_sensitivity_base = 1
-            self._df = preprocessing.preprocess_data(
+                self.count_sensitivity_base = 1 ## if no user level privacy
+            self._df = preprocessing.preprocess_data( ## return DataFrame
                 df.copy(),  # copy, to not overwrite users instance of df
                 self.tessellation,
                 self.max_trips_per_user,
@@ -162,7 +168,7 @@ class DpMobilityReport:
         self.bin_range_user_tile_count = bin_range_user_tile_count
         self.max_user_time_delta = max_user_time_delta
         self.bin_range_user_time_delta = bin_range_user_time_delta
-        self._analysis_exclusion = preprocessing.clean_analysis_exclusion(
+        self._analysis_exclusion = preprocessing.clean_analysis_exclusion( ## haut alle analysen auf die exclusion list, die ungewollt sind oder aufgrund der Datenlage nicht möglich sind.
             analysis_selection,
             analysis_exclusion,
             has_tessellation=(tessellation is not None),
@@ -179,12 +185,14 @@ class DpMobilityReport:
             )
             > 1,
         )
-        self._budget_split = preprocessing.clean_budget_split(
+        self._budget_split = preprocessing.clean_budget_split( ## haut aus dem Budgetsplit alle raus die von der analyse exkludiert werden müssen.
             budget_split, self._analysis_exclusion
         )
         self.evalu = evalu
         self.disable_progress_bar = disable_progress_bar
         self.subtitle = subtitle
+        self.gaussian = gaussian
+        self.delta = delta
 
         # initialize parallel processing
         pandarallel.initialize(verbose=0)
@@ -261,7 +269,7 @@ class DpMobilityReport:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        create_html_assets(output_dir)
+        create_html_assets(output_dir) ##kopiert die css Sachen und zeug rüber
 
         # create report if not created yet (to display progress bar in correct order)
         self.report

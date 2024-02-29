@@ -63,6 +63,8 @@ def validate_input(
     max_user_time_delta: Optional[Union[int, float]],
     bin_range_user_time_delta: Optional[Union[int, float]],
     seed_sampling: Optional[int],
+    gaussian: bool,
+    delta: Union[float, None]
 ) -> None:
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
@@ -122,6 +124,7 @@ def validate_input(
     _validate_bool(user_privacy, f"{user_privacy=}".split("=")[0])
     _validate_bool(evalu, f"{evalu=}".split("=")[0])
     _validate_bool(disable_progress_bar, f"{disable_progress_bar=}".split("=")[0])
+    _validate_bool(gaussian, f"{gaussian=}".split("=")[0])
 
     if privacy_budget is not None:
         _validate_numeric_greater_zero(
@@ -163,6 +166,20 @@ def validate_input(
         raise TypeError("'seed_sampling' is not an integer.")
     if (seed_sampling is not None) and (seed_sampling <= 0):
         raise ValueError("'seed_sampling' has to be greater 0.")
+
+    if (not gaussian) and (delta is not None):
+        warnings.warn("Input parameter 'delta' is set, but will never be used because gaussian is not chosen")
+    if gaussian and (delta is None):
+        warnings.warn("No delta value is set and therefore a default value will be set.")
+    _validate_delta(delta, f"{delta=}".split("=")[0]
+    )
+
+def _validate_delta(var: Any, name: str)-> None:
+    if not ((var is None) or isinstance(var, float)):
+        raise TypeError(f"{name} is not an float.")
+    if (var is not None) and not (0 < var <= 1):
+        raise ValueError(f"'{name}' has to be greater than 0 and less than or equal 1")
+
 
 
 def _validate_int_greater_zero(var: Any, name: str) -> None:
@@ -349,8 +366,8 @@ def preprocess_data(
     max_trips_per_user: int,
     user_privacy: bool,
     seed: Optional[int],
-) -> pd.DataFrame:
-    df = _validate_columns(df)
+) -> pd.DataFrame: ## returned our dataframe
+    df = _validate_columns(df) ## are all necessary columns there?
 
     df.loc[:, const.ID] = range(0, len(df))
 
@@ -376,7 +393,7 @@ def preprocess_data(
         )
 
     # remove waypoints
-    df = df.sort_values(const.DATETIME).groupby(const.TID, as_index=False).nth([0, -1])
+    df = df.sort_values(const.DATETIME).groupby(const.TID, as_index=False).nth([0, -1]) ## Zwischenstopps entfernen -> schwer zu anonymisieren
 
     # assign start and end as point_type
     df[const.POINT_TYPE] = "start"
