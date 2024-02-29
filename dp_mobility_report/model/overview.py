@@ -17,7 +17,9 @@ from dp_mobility_report.privacy import diff_privacy
 def get_dataset_statistics(
     dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> DictSection:
-    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 4)
+    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 4)  ## nur durch 4, weil 2 von 6 Statistiken von den anderen abhängig sind
+    gaussian = dpmreport.gaussian
+    delta = dpmreport.delta
 
     # counts for complete and incomplete trips
     points_per_trip = (
@@ -25,23 +27,27 @@ def get_dataset_statistics(
     )
     n_incomplete_trips = 0 if 1 not in points_per_trip else points_per_trip[1]
     n_incomplete_trips = diff_privacy.count_dp(
-        n_incomplete_trips,
+        n_incomplete_trips,  ## real value
         epsi,
-        dpmreport.count_sensitivity_base,
+        sensitivity=dpmreport.count_sensitivity_base,  ## max trips per user bei user-level privacy, wenn no privacy: 1
+        gaussian=gaussian,
+        delta=delta,
     )
 
-    moe_incomplete_trips = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, dpmreport.count_sensitivity_base
+    moe_incomplete_trips = diff_privacy.margin_of_error(
+        0.95, epsi, delta, dpmreport.count_sensitivity_base, gaussian
     )
 
     n_complete_trips = 0 if 2 not in points_per_trip else points_per_trip[2]
     n_complete_trips = diff_privacy.count_dp(
         n_complete_trips,
         epsi,
-        2 * dpmreport.count_sensitivity_base,
+        2 * dpmreport.count_sensitivity_base,  ## 2 * max_trips_per_user
+        gaussian=dpmreport.gaussian,
+        delta=dpmreport.delta,
     )
-    moe_complete_trips = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * dpmreport.count_sensitivity_base
+    moe_complete_trips = diff_privacy.margin_of_error(
+        0.95, epsi, delta, 2*dpmreport.count_sensitivity_base, gaussian
     )
 
     n_trips = n_incomplete_trips + n_complete_trips
@@ -64,18 +70,23 @@ def get_dataset_statistics(
         ) / n_records
 
     n_users = diff_privacy.count_dp(
-        dpmreport.df[const.UID].nunique(), epsi, 1, nonzero=True
+        dpmreport.df[const.UID].nunique(), epsi, 1, nonzero=True,  gaussian=dpmreport.gaussian,
+        delta=dpmreport.delta,
     )
-    moe_users = diff_privacy.laplace_margin_of_error(0.95, epsi, 1)
+    moe_users = diff_privacy.margin_of_error(
+        0.95, epsi, delta, 1, gaussian
+    )
 
     n_locations = diff_privacy.count_dp(
         dpmreport.df.groupby([const.LAT, const.LNG]).ngroups,
         epsi,
         2 * dpmreport.count_sensitivity_base,
         nonzero=True,
+        gaussian=dpmreport.gaussian,
+        delta=dpmreport.delta,
     )
-    moe_locations = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * dpmreport.count_sensitivity_base
+    moe_locations = diff_privacy.margin_of_error(
+        0.95, epsi, delta, 2*dpmreport.count_sensitivity_base, gaussian
     )
 
     stats = {
@@ -104,16 +115,22 @@ def get_missing_values(
 ) -> DictSection:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, len(columns))
+    gaussian = dpmreport.gaussian
+    delta = dpmreport.delta
 
     missings = dict((len(dpmreport.df) - dpmreport.df.count())[columns])
 
-    moe = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, 2 * dpmreport.count_sensitivity_base
+    moe = diff_privacy.margin_of_error(
+        0.95, epsi, delta, 2*dpmreport.count_sensitivity_base, gaussian
     )
     conf_interval = {}
     for col in columns:
         missings[col] = diff_privacy.count_dp(
-            missings[col], epsi, 2 * dpmreport.count_sensitivity_base
+            missings[col],
+            epsi,
+            2 * dpmreport.count_sensitivity_base,
+            gaussian=dpmreport.gaussian,
+            delta=dpmreport.delta,
         )
         conf_interval["ci95_" + col] = diff_privacy.conf_interval(missings[col], moe)
 
@@ -125,6 +142,8 @@ def get_trips_over_time(
 ) -> DfSection:
     epsi = m_utils.get_epsi(dpmreport.evalu, eps, 3)
     epsi_limits = epsi * 2 if epsi is not None else None
+    gaussian = dpmreport.gaussian
+    delta = dpmreport.delta
 
     df_trip = dpmreport.df[
         (dpmreport.df[const.POINT_TYPE] == const.END)
@@ -148,7 +167,7 @@ def get_trips_over_time(
     # different aggregations based on range of dates
     range_of_days = dp_bounds[1] - dp_bounds[0]
     if range_of_days > timedelta(days=712):  # more than two years (102 weeks)
-        resample = "M"
+        resample = "ME"
         datetime_precision = const.PREC_MONTH
     elif range_of_days > timedelta(days=90):  # more than three months
         resample = "W-Mon"
@@ -168,11 +187,13 @@ def get_trips_over_time(
     trips_over_time["trip_count"] = diff_privacy.counts_dp(
         trips_over_time["trip_count"].values,
         epsi,
+        delta,
         dpmreport.count_sensitivity_base,
+        gaussian
     )
 
-    moe_laplace = diff_privacy.laplace_margin_of_error(
-        0.95, epsi, dpmreport.count_sensitivity_base
+    moe_laplace = diff_privacy.margin_of_error(
+        0.95, epsi, delta, dpmreport.count_sensitivity_base, gaussian
     )
 
     # as percent instead of absolute values
@@ -200,6 +221,8 @@ def get_trips_per_weekday(
     dpmreport.df.loc[:, const.DATE] = dpmreport.df[const.DATETIME].dt.date
     dpmreport.df.loc[:, const.DAY_NAME] = dpmreport.df[const.DATETIME].dt.day_name()
     dpmreport.df.loc[:, const.WEEKDAY] = dpmreport.df[const.DATETIME].dt.weekday
+    gaussian = dpmreport.gaussian
+    delta = dpmreport.delta
 
     trips_per_weekday = (
         dpmreport.df[
@@ -223,11 +246,13 @@ def get_trips_per_weekday(
         data=diff_privacy.counts_dp(
             trips_per_weekday.values,
             eps,
+            delta,
             dpmreport.count_sensitivity_base,
+            gaussian
         ),
     )
-    moe = diff_privacy.laplace_margin_of_error(
-        0.95, eps, dpmreport.count_sensitivity_base
+    moe = diff_privacy.margin_of_error(
+        0.95, eps, delta, dpmreport.count_sensitivity_base, gaussian
     )
 
     # as percent instead of absolute values
@@ -244,6 +269,8 @@ def get_trips_per_weekday(
 def get_trips_per_hour(
     dpmreport: "DpMobilityReport", eps: Optional[float]
 ) -> DfSection:
+    gaussian = dpmreport.gaussian
+    delta = dpmreport.delta
     hour_weekday = dpmreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]
@@ -272,14 +299,14 @@ def get_trips_per_hour(
 
     hour_weekday = hour_weekday.reset_index()
     hour_weekday["count"] = diff_privacy.counts_dp(
-        hour_weekday["count"], eps, dpmreport.count_sensitivity_base
+        hour_weekday["count"], eps, delta, dpmreport.count_sensitivity_base, gaussian
     )
 
     hour_weekday[const.TIME_CATEGORY] = (
         hour_weekday[const.IS_WEEKEND] + " " + hour_weekday[const.POINT_TYPE]
     )
-    moe = diff_privacy.laplace_margin_of_error(
-        0.95, eps, dpmreport.count_sensitivity_base
+    moe = diff_privacy.margin_of_error(
+        0.95, eps, delta, dpmreport.count_sensitivity_base, gaussian
     )
 
     # as percent instead of absolute values

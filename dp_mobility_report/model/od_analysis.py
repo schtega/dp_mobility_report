@@ -39,6 +39,8 @@ def get_od_flows(
     eps: Optional[float],
 ) -> DfSection:
     sensitivity = dpmreport.count_sensitivity_base
+    delta = dpmreport.delta
+    gaussian = dpmreport.gaussian
     od_flows = (
         od_shape[od_shape[const.TILE_ID].notna() & od_shape[const.TILE_ID_END].notna()]
         .groupby([const.TILE_ID, const.TILE_ID_END])
@@ -54,7 +56,7 @@ def get_od_flows(
     )
 
     # margin of error
-    moe = diff_privacy.laplace_margin_of_error(0.95, eps, sensitivity)
+    moe = diff_privacy.margin_of_error(0.95, eps, delta, sensitivity, gaussian)
 
     # fill all potential combinations with 0s for correct application of dp
     full_tile_ids = np.unique(dpmreport.tessellation[const.TILE_ID])
@@ -65,7 +67,7 @@ def get_od_flows(
     od_flows.fillna(0, inplace=True)
 
     od_flows[const.FLOW] = diff_privacy.counts_dp(
-        od_flows[const.FLOW].to_numpy(), eps, sensitivity, allow_negative=True
+        od_flows[const.FLOW].to_numpy(), eps, delta, sensitivity, gaussian, allow_negative=True
     )
 
     # remove all instances of 0 (and smaller) to reduce storage
@@ -106,6 +108,8 @@ def get_travel_time(
         bin_range=dpmreport.bin_range_travel_time,
         bin_type=int,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )
 
 
@@ -124,4 +128,6 @@ def get_jump_length(
         hist_max=dpmreport.max_jump_length,
         bin_range=dpmreport.bin_range_jump_length,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )

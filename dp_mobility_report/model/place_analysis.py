@@ -17,6 +17,8 @@ def get_visits_per_tile(
     eps: Optional[float],
 ) -> DfSection:
     epsi = eps
+    delta = dpmreport.delta
+    gaussian = dpmreport.gaussian
 
     sensitivity = 2 * dpmreport.count_sensitivity_base
     # count number of visits for each location
@@ -44,19 +46,21 @@ def get_visits_per_tile(
     visits_per_tile["visits"] = diff_privacy.counts_dp(
         visits_per_tile["visits"].values,
         epsi,
+        delta,
         sensitivity,
+        gaussian,
         allow_negative=False,
     )
-    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity)
+    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity, gaussian=dpmreport.gaussian, delta=dpmreport.delta)
 
-    cumsum = m_utils.cumsum(
+    cumsum = m_utils.cumsum(  ## no privacy added inside this function
         visits_per_tile.visits.copy().to_numpy(),
-        epsi,
-        sensitivity,
+        epsi,  ## not used
+        sensitivity,  ## not used
     )
 
     # margin of error
-    moe = diff_privacy.laplace_margin_of_error(0.95, epsi, sensitivity)
+    moe = diff_privacy.margin_of_error(0.95, epsi, delta, sensitivity, gaussian)
 
     # as counts are already dp, no further privacy mechanism needed
     dp_quartiles = visits_per_tile.visits.describe()
@@ -93,14 +97,17 @@ def get_visits_per_time_tile(
         lambda x: _get_hour_bin(x, dpmreport.timewindows)
     )
 
+    delta = dpmreport.delta
+    gaussian = dpmreport.gaussian
+
     # only points within tessellation and end points
     counts_per_tile_timewindow = dpmreport.df[
         (dpmreport.df[const.POINT_TYPE] == const.END)
         & dpmreport.df[const.TILE_ID].isin(dpmreport.tessellation[const.TILE_ID])
     ][[const.TILE_ID, const.IS_WEEKEND, "timewindows"]]
 
-    moe = diff_privacy.laplace_margin_of_error(
-        0.95, eps, dpmreport.count_sensitivity_base
+    moe = diff_privacy.margin_of_error(
+        0.95, eps, delta, dpmreport.count_sensitivity_base, gaussian
     )
 
     # create full combination of all times and tiles for application of dp
@@ -132,7 +139,7 @@ def get_visits_per_time_tile(
     counts_per_tile_timewindow = pd.Series(
         index=counts_per_tile_timewindow.index,
         data=diff_privacy.counts_dp(
-            counts_per_tile_timewindow.values, eps, dpmreport.count_sensitivity_base
+            counts_per_tile_timewindow.values, eps, delta, dpmreport.count_sensitivity_base, gaussian
         ),
     )
 

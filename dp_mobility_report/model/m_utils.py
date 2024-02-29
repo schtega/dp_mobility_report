@@ -12,7 +12,8 @@ from dp_mobility_report.privacy import diff_privacy
 
 def haversine_dist(coords: List[float]) -> float:
     # coords: provide coordinates as lat_start, lng_start, lat_end, lng_end
-    return haversine((coords[0], coords[1]), (coords[2], coords[3]))
+    return haversine((coords[0], coords[1]), (coords[2], coords[3])) # FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+
 
 
 def _round_up(n: Union[float, int], decimals: int = 0) -> float:
@@ -48,6 +49,8 @@ def hist_section(
     bin_range: Optional[Union[float, int]] = None,
     bin_type: Type = float,
     evalu: bool = False,
+    delta: Optional[float] = 0.0001,
+    gaussian: bool = False
 ) -> TupleSection:
     epsi = get_epsi(evalu, eps, 6)
     epsi_quant = epsi * 5 if epsi is not None else None
@@ -139,7 +142,7 @@ def hist_section(
         # as hist_min is currently only used for mobility_entropy with min_value = 0, we dont need to sum all counts below min accordingly
         # to be generically applicable, this would be needed!
 
-    dp_counts = diff_privacy.counts_dp(counts, epsi, sensitivity)
+    dp_counts = diff_privacy.counts_dp(counts, epsi, delta, sensitivity, gaussian)
 
     # set counts above dp_max(i.e, quartiles["max"]) to 0 (only so that bins are shown according to user input, even if they are empty)
     # if bin is "inf" it should be maintained as it is the aggregation of everything > hist_max and <= quartiles["max"]

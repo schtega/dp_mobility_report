@@ -24,6 +24,8 @@ def get_trips_per_user(
         hist_max=dpmreport.max_trips_per_user,
         bin_type=int,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )
 
 
@@ -50,6 +52,8 @@ def get_user_time_delta(
         bin_range=dpmreport.bin_range_user_time_delta,
         sensitivity=dpmreport.max_trips_per_user,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )
     sec.quartiles = pd.to_timedelta(sec.quartiles, unit="h").apply(
         lambda x: x.round(freq="s")
@@ -68,6 +72,8 @@ def get_radius_of_gyration(
         hist_max=dpmreport.max_radius_of_gyration,
         bin_range=dpmreport.bin_range_radius_of_gyration,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )
 
 
@@ -122,6 +128,8 @@ def get_user_tile_count(
         hist_max=dpmreport.max_user_tile_count,
         bin_range=dpmreport.bin_range_user_tile_count,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )
 
 
@@ -162,4 +170,6 @@ def get_mobility_entropy(
         hist_max=1,
         hist_min=0,
         evalu=dpmreport.evalu,
+        delta=dpmreport.delta,
+        gaussian=dpmreport.gaussian
     )
