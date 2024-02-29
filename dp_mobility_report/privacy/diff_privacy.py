@@ -3,9 +3,10 @@ from typing import Optional, Tuple, Type, Union
 import diffprivlib
 import numpy as np
 import pandas as pd
+import math
 from diffprivlib.validation import clip_to_bounds
 from scipy.stats import laplace
-
+from scipy.stats import norm
 
 def bounds_dp(
     array: Union[np.ndarray, pd.Series], eps: Optional[float], sensitivity: int
@@ -130,7 +131,16 @@ def _laplacer(x: int, eps: float, sensitivity: int) -> int:
             0,
         )
     )
-
+def _gaussianer(x: int, eps: float, delta: float, sensitivity: int) -> int:
+    sensitivity = math.sqrt(sensitivity)
+    return int(
+        round(
+            diffprivlib.mechanisms.GaussianAnalytic(
+                epsilon=eps, delta=delta, sensitivity=sensitivity
+            ).randomise(x),
+            0,
+        )
+    )
 
 def laplace_margin_of_error(
     conf_interval_perc: float, eps: Optional[float], sensitivity: int
@@ -141,6 +151,23 @@ def laplace_margin_of_error(
     q = conf_interval_perc + 0.5 * (1 - conf_interval_perc)
     scale = sensitivity / (eps - np.log(1 - delta))
     return laplace.ppf(q, loc=0, scale=scale)
+
+
+def gauss_margin_of_error(
+    conf_interval_perc: float, eps: Optional[float], delta: Optional[float],  sensitivity: int
+) -> float:
+    if eps is None or delta is None:
+        return 0
+    q = conf_interval_perc + 0.5 * (1 - conf_interval_perc)
+    scale = np.sqrt(2 * np.log(1.25 / delta)) * sensitivity / eps #TODO je nach gauss noch anpassen
+    return norm.ppf(q, loc=0, scale=scale)
+
+
+def margin_of_error(conf_interval_perc: float, eps: Optional[float], delta: Optional[float], sensitivity: int, gaussian: bool) -> float:
+    if gaussian:
+        return gauss_margin_of_error(conf_interval_perc, eps, delta, sensitivity)
+    else:
+        return laplace_margin_of_error(conf_interval_perc, eps, sensitivity)
 
 
 def conf_interval(
@@ -159,12 +186,18 @@ def count_dp(
     count: int,
     eps: Optional[float],
     sensitivity: int,
+    gaussian: bool,
+    delta: Optional[float],
     nonzero: bool = False,
 ) -> Optional[int]:
     if eps is None:
         return count
-    dpcount = _laplacer(count, eps, sensitivity)
-    dpcount = int((abs(dpcount) + dpcount) / 2)
+    if gaussian:
+        dpcount = _gaussianer(count, eps, delta, sensitivity)
+        dpcount = int((abs(dpcount) + dpcount) / 2)  ## falls dpcount negativ wird er null
+    else:
+        dpcount = _laplacer(count, eps, sensitivity)  ## laplacenoise auf unsere zahl
+        dpcount = int((abs(dpcount) + dpcount) / 2)  ## falls dpcount negativ wird er null
     if nonzero:
         return dpcount if dpcount > 0 else None
     else:
@@ -174,8 +207,11 @@ def count_dp(
 def counts_dp(
     counts: Union[int, np.ndarray],  # TODO: only array?
     eps: Optional[float],
+    delta: Optional[float],
     sensitivity: int,
+    gaussian: bool,
     allow_negative: bool = False,
+
 ) -> np.ndarray:
     if eps is None:
         return counts
@@ -184,7 +220,13 @@ def counts_dp(
     def _local_laplacer(x: int) -> int:
         return _laplacer(x, eps_local, sensitivity)
 
-    vfunc = np.vectorize(_local_laplacer)
+    def _local_gaussianer(x: int) -> int:
+        return _gaussianer(x, eps_local, delta, sensitivity)
+
+    if gaussian:
+        vfunc = np.vectorize(_local_gaussianer)
+    else:
+        vfunc = np.vectorize(_local_laplacer)
     dpcounts = vfunc(counts)
     dpcounts = (
         limit_negative_values_to_zero(dpcounts) if not allow_negative else dpcounts
