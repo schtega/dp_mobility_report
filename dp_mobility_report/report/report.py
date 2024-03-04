@@ -30,7 +30,7 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
     )
     if dpmreport.gaussian:
         budget_split_sum = math.sqrt(budget_split_sum)
-
+        deltai = dpmreport.delta/(len(const.ELEMENTS) - len(dpmreport.analysis_exclusion)) #TODO: Noch überall deltai einfügen?
 
     # get privacy budget for each report element
     if dpmreport.privacy_budget is None or dpmreport.evalu:
