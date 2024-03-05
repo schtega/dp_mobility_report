@@ -15,11 +15,11 @@ from dp_mobility_report.privacy import diff_privacy
 
 
 def get_dataset_statistics(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> DictSection:
-    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 4)  ## nur durch 4, weil 2 von 6 Statistiken von den anderen abhängig sind
+    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, 4)  ## nur durch 4, weil 2 von 6 Statistiken von den anderen abhängig sind
     gaussian = dpmreport.gaussian
-    delta = dpmreport.delta
+    deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, 4)
 
     # counts for complete and incomplete trips
     points_per_trip = (
@@ -31,11 +31,11 @@ def get_dataset_statistics(
         epsi,
         sensitivity=dpmreport.count_sensitivity_base,  ## max trips per user bei user-level privacy, wenn no privacy: 1
         gaussian=gaussian,
-        delta=delta,
+        delta=deltai,
     )
 
     moe_incomplete_trips = diff_privacy.margin_of_error(
-        0.95, epsi, delta, dpmreport.count_sensitivity_base, gaussian
+        0.95, epsi, deltai, dpmreport.count_sensitivity_base, gaussian
     )
 
     n_complete_trips = 0 if 2 not in points_per_trip else points_per_trip[2]
@@ -44,10 +44,10 @@ def get_dataset_statistics(
         epsi,
         2 * dpmreport.count_sensitivity_base,  ## 2 * max_trips_per_user
         gaussian=dpmreport.gaussian,
-        delta=dpmreport.delta,
+        delta=deltai,
     )
     moe_complete_trips = diff_privacy.margin_of_error(
-        0.95, epsi, delta, 2*dpmreport.count_sensitivity_base, gaussian
+        0.95, epsi, deltai, 2*dpmreport.count_sensitivity_base, gaussian
     )
 
     n_trips = n_incomplete_trips + n_complete_trips
@@ -71,10 +71,10 @@ def get_dataset_statistics(
 
     n_users = diff_privacy.count_dp(
         dpmreport.df[const.UID].nunique(), epsi, 1, nonzero=True,  gaussian=dpmreport.gaussian,
-        delta=dpmreport.delta,
+        delta=deltai,
     )
     moe_users = diff_privacy.margin_of_error(
-        0.95, epsi, delta, 1, gaussian
+        0.95, epsi, deltai, 1, gaussian
     )
 
     n_locations = diff_privacy.count_dp(
@@ -83,10 +83,10 @@ def get_dataset_statistics(
         2 * dpmreport.count_sensitivity_base,
         nonzero=True,
         gaussian=dpmreport.gaussian,
-        delta=dpmreport.delta,
+        delta=deltai,
     )
     moe_locations = diff_privacy.margin_of_error(
-        0.95, epsi, delta, 2*dpmreport.count_sensitivity_base, gaussian
+        0.95, epsi, deltai, 2*dpmreport.count_sensitivity_base, gaussian
     )
 
     stats = {
@@ -111,17 +111,17 @@ def get_dataset_statistics(
 
 
 def get_missing_values(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> DictSection:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-    epsi = m_utils.get_epsi(dpmreport.evalu, eps, len(columns))
+    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, len(columns))
     gaussian = dpmreport.gaussian
-    delta = dpmreport.delta
+    deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, len(columns))
 
     missings = dict((len(dpmreport.df) - dpmreport.df.count())[columns])
 
     moe = diff_privacy.margin_of_error(
-        0.95, epsi, delta, 2*dpmreport.count_sensitivity_base, gaussian
+        0.95, epsi, deltai, 2*dpmreport.count_sensitivity_base, gaussian
     )
     conf_interval = {}
     for col in columns:
@@ -130,7 +130,7 @@ def get_missing_values(
             epsi,
             2 * dpmreport.count_sensitivity_base,
             gaussian=dpmreport.gaussian,
-            delta=dpmreport.delta,
+            delta=deltai,
         )
         conf_interval["ci95_" + col] = diff_privacy.conf_interval(missings[col], moe)
 
@@ -138,12 +138,12 @@ def get_missing_values(
 
 
 def get_trips_over_time(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> DfSection:
-    epsi = m_utils.get_epsi(dpmreport.evalu, eps, 3)
+    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, 3)
     epsi_limits = epsi * 2 if epsi is not None else None
     gaussian = dpmreport.gaussian
-    delta = dpmreport.delta
+    deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, 3)
 
     df_trip = dpmreport.df[
         (dpmreport.df[const.POINT_TYPE] == const.END)
@@ -187,13 +187,13 @@ def get_trips_over_time(
     trips_over_time["trip_count"] = diff_privacy.counts_dp(
         trips_over_time["trip_count"].values,
         epsi,
-        delta,
+        deltai,
         dpmreport.count_sensitivity_base,
         gaussian
     )
 
     moe_laplace = diff_privacy.margin_of_error(
-        0.95, epsi, delta, dpmreport.count_sensitivity_base, gaussian
+        0.95, epsi, deltai, dpmreport.count_sensitivity_base, gaussian
     )
 
     # as percent instead of absolute values
@@ -216,13 +216,12 @@ def get_trips_over_time(
 
 
 def get_trips_per_weekday(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> SeriesSection:
     dpmreport.df.loc[:, const.DATE] = dpmreport.df[const.DATETIME].dt.date
     dpmreport.df.loc[:, const.DAY_NAME] = dpmreport.df[const.DATETIME].dt.day_name()
     dpmreport.df.loc[:, const.WEEKDAY] = dpmreport.df[const.DATETIME].dt.weekday
     gaussian = dpmreport.gaussian
-    delta = dpmreport.delta
 
     trips_per_weekday = (
         dpmreport.df[
@@ -267,10 +266,9 @@ def get_trips_per_weekday(
 
 
 def get_trips_per_hour(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> DfSection:
     gaussian = dpmreport.gaussian
-    delta = dpmreport.delta
     hour_weekday = dpmreport.df.groupby(
         [const.HOUR, const.IS_WEEKEND, const.POINT_TYPE]
     ).count()[const.TID]

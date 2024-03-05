@@ -15,9 +15,9 @@ from dp_mobility_report.privacy import diff_privacy
 def get_visits_per_tile(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
+    delta: Optional[float],
 ) -> DfSection:
     epsi = eps
-    delta = dpmreport.delta
     gaussian = dpmreport.gaussian
 
     sensitivity = 2 * dpmreport.count_sensitivity_base
@@ -51,7 +51,7 @@ def get_visits_per_tile(
         gaussian,
         allow_negative=False,
     )
-    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity, gaussian=dpmreport.gaussian, delta=dpmreport.delta)
+    n_outliers = diff_privacy.count_dp(n_outliers, epsi, sensitivity, gaussian=dpmreport.gaussian, delta=delta)
 
     cumsum = m_utils.cumsum(  ## no privacy added inside this function
         visits_per_tile.visits.copy().to_numpy(),
@@ -91,13 +91,13 @@ def _get_hour_bin(hour: int, timewindows: np.ndarray) -> str:
 def get_visits_per_time_tile(
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
+    delta: Optional[float],
     # trip_count: Optional[int], outlier_count: Optional[None]
 ) -> DfSection:
     dpmreport.df["timewindows"] = dpmreport.df[const.HOUR].apply(
         lambda x: _get_hour_bin(x, dpmreport.timewindows)
     )
 
-    delta = dpmreport.delta
     gaussian = dpmreport.gaussian
 
     # only points within tessellation and end points

@@ -13,7 +13,7 @@ from dp_mobility_report.model.section import TupleSection
 
 
 def get_trips_per_user(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> TupleSection:
     user_nunique = dpmreport.df.groupby(const.UID).nunique()[const.TID]
 
@@ -24,13 +24,13 @@ def get_trips_per_user(
         hist_max=dpmreport.max_trips_per_user,
         bin_type=int,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )
 
 
 def get_user_time_delta(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> Optional[TupleSection]:
 
     dpmreport._df = dpmreport.df.sort_values(
@@ -52,7 +52,7 @@ def get_user_time_delta(
         bin_range=dpmreport.bin_range_user_time_delta,
         sensitivity=dpmreport.max_trips_per_user,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )
     sec.quartiles = pd.to_timedelta(sec.quartiles, unit="h").apply(
@@ -62,7 +62,7 @@ def get_user_time_delta(
 
 
 def get_radius_of_gyration(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> TupleSection:
     rg = _radius_of_gyration(dpmreport.df)
     return m_utils.hist_section(
@@ -72,7 +72,7 @@ def get_radius_of_gyration(
         hist_max=dpmreport.max_radius_of_gyration,
         bin_range=dpmreport.bin_range_radius_of_gyration,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )
 
@@ -116,7 +116,7 @@ def _tile_visits_by_user(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_user_tile_count(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> TupleSection:
     user_tile_count = dpmreport.df.groupby(const.UID).nunique()[const.TILE_ID]
 
@@ -128,7 +128,7 @@ def get_user_tile_count(
         hist_max=dpmreport.max_user_tile_count,
         bin_range=dpmreport.bin_range_user_tile_count,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )
 
@@ -158,7 +158,7 @@ def _mobility_entropy(df: pd.DataFrame) -> np.ndarray:
 
 
 def get_mobility_entropy(
-    dpmreport: "DpMobilityReport", eps: Optional[float]
+    dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> TupleSection:
     mobility_entropy = _mobility_entropy(dpmreport.df)
 
@@ -170,6 +170,6 @@ def get_mobility_entropy(
         hist_max=1,
         hist_min=0,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )

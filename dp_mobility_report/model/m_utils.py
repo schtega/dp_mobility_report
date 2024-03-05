@@ -52,7 +52,7 @@ def hist_section(
     delta: Optional[float] = 0.0001,
     gaussian: bool = False
 ) -> TupleSection:
-    epsi = get_epsi(evalu, eps, 6)
+    epsi = get_epsi_or_deltai(evalu, eps, 6)
     epsi_quant = epsi * 5 if epsi is not None else None
 
     series = Series(series) if isinstance(series, np.ndarray) else series
@@ -174,7 +174,7 @@ def hist_section(
     )
 
 
-def get_epsi(evalu: bool, eps: Optional[float], elements: int) -> Optional[float]:
+def get_epsi_or_deltai(evalu: bool, eps: Optional[float], elements: int) -> Optional[float]: # Also works to get deltai
     if evalu or eps is None:
         return eps
     else:

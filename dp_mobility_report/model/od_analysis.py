@@ -37,9 +37,9 @@ def get_od_flows(
     od_shape: pd.DataFrame,
     dpmreport: "DpMobilityReport",
     eps: Optional[float],
+    delta: Optional[float]
 ) -> DfSection:
     sensitivity = dpmreport.count_sensitivity_base
-    delta = dpmreport.delta
     gaussian = dpmreport.gaussian
     od_flows = (
         od_shape[od_shape[const.TILE_ID].notna() & od_shape[const.TILE_ID_END].notna()]
@@ -73,6 +73,7 @@ def get_od_flows(
     # remove all instances of 0 (and smaller) to reduce storage
     od_flows = od_flows[od_flows["flow"] > 0]
 
+    # eps and sensitivity currently not used
     cumsum = m_utils.cumsum(od_flows.flow.copy().to_numpy(), eps, sensitivity)
 
     # TODO: distribution with or without 0s?
@@ -94,7 +95,7 @@ def get_intra_tile_flows(od_flows: pd.DataFrame) -> int:
 
 
 def get_travel_time(
-    od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float]
+    od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> TupleSection:
 
     travel_time = od_shape[const.DATETIME_END] - od_shape[const.DATETIME]
@@ -108,13 +109,13 @@ def get_travel_time(
         bin_range=dpmreport.bin_range_travel_time,
         bin_type=int,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )
 
 
 def get_jump_length(
-    od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float]
+    od_shape: pd.DataFrame, dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> TupleSection:
 
     # parallel computation for speed up
@@ -128,6 +129,6 @@ def get_jump_length(
         hist_max=dpmreport.max_jump_length,
         bin_range=dpmreport.bin_range_jump_length,
         evalu=dpmreport.evalu,
-        delta=dpmreport.delta,
+        delta=delta,
         gaussian=dpmreport.gaussian
     )

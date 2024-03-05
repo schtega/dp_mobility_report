@@ -17,7 +17,7 @@ def test_dpmreport():
 
 def test_get_dataset_statistics(test_dpmreport):
     """Correct dateset statistics without noise."""
-    ds_stats = overview.get_dataset_statistics(test_dpmreport, None).data
+    ds_stats = overview.get_dataset_statistics(test_dpmreport, None, None).data
     assert ds_stats[const.N_RECORDS] == 200
     assert ds_stats[const.N_TRIPS] == 100
     assert ds_stats[const.N_COMPLETE_TRIPS] == 100

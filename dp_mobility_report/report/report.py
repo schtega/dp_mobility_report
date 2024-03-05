@@ -30,7 +30,9 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
     )
     if dpmreport.gaussian:
         budget_split_sum = math.sqrt(budget_split_sum)
-        deltai = dpmreport.delta/(len(const.ELEMENTS) - len(dpmreport.analysis_exclusion)) #TODO: Noch überall deltai einfügen?
+        deltai = dpmreport.delta/(len(const.ELEMENTS) - len(dpmreport.analysis_exclusion))
+    else:
+        deltai = None
 
     # get privacy budget for each report element
     if dpmreport.privacy_budget is None or dpmreport.evalu:
@@ -46,12 +48,12 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
         total=4, desc="Create report", disable=dpmreport.disable_progress_bar
     ) as pbar:
 
-        report = {**report, **add_overview_elements(dpmreport, eps_factor)}
+        report = {**report, **add_overview_elements(dpmreport, eps_factor, deltai)}
         pbar.update()
 
         report = {
             **report,
-            **add_place_analysis_elements(dpmreport, eps_factor),
+            **add_place_analysis_elements(dpmreport, eps_factor, deltai),
         }
         pbar.update()
 
@@ -59,11 +61,11 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
             _od_shape = od_analysis.get_od_shape(dpmreport.df)
             report = {
                 **report,
-                **add_od_analysis_elements(dpmreport, _od_shape, eps_factor),
+                **add_od_analysis_elements(dpmreport, _od_shape, eps_factor, deltai),
             }
         pbar.update()
 
-        report = {**report, **add_user_analysis_elements(dpmreport, eps_factor)}
+        report = {**report, **add_user_analysis_elements(dpmreport, eps_factor, deltai)}
         pbar.update()
 
     return report
@@ -82,14 +84,14 @@ def _get_eps(eps_factor: float, analysis_name: str, budget_split: dict, gaussian
         return budget_split[analysis_name] * eps_factor
 
 
-def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> dict:
+def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float, deltai: float) -> dict:
     overview_elements: dict = {}
 
     if (const.DS_STATISTICS in const.OVERVIEW_ELEMENTS) and (
         const.DS_STATISTICS not in dpmreport.analysis_exclusion
     ):
         overview_elements[const.DS_STATISTICS] = overview.get_dataset_statistics(
-            dpmreport, _get_eps(eps_factor, const.DS_STATISTICS, dpmreport.budget_split, dpmreport.gaussian)
+            dpmreport, _get_eps(eps_factor, const.DS_STATISTICS, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.MISSING_VALUES in const.OVERVIEW_ELEMENTS) and (
@@ -97,7 +99,7 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
     ):
         overview_elements[const.MISSING_VALUES] = overview.get_missing_values(
             dpmreport,
-            _get_eps(eps_factor, const.MISSING_VALUES, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.MISSING_VALUES, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.TRIPS_OVER_TIME in const.OVERVIEW_ELEMENTS) and (
@@ -105,7 +107,7 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
     ):
         overview_elements[const.TRIPS_OVER_TIME] = overview.get_trips_over_time(
             dpmreport,
-            _get_eps(eps_factor, const.TRIPS_OVER_TIME, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.TRIPS_OVER_TIME, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.TRIPS_PER_WEEKDAY in const.TRIPS_PER_WEEKDAY) and (
@@ -113,7 +115,7 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
     ):
         overview_elements[const.TRIPS_PER_WEEKDAY] = overview.get_trips_per_weekday(
             dpmreport,
-            _get_eps(eps_factor, const.TRIPS_PER_WEEKDAY, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.TRIPS_PER_WEEKDAY, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.TRIPS_PER_HOUR in const.OVERVIEW_ELEMENTS) and (
@@ -121,7 +123,7 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
     ):
         overview_elements[const.TRIPS_PER_HOUR] = overview.get_trips_per_hour(
             dpmreport,
-            _get_eps(eps_factor, const.TRIPS_PER_HOUR, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.TRIPS_PER_HOUR, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
     return overview_elements
 
@@ -129,6 +131,7 @@ def add_overview_elements(dpmreport: "DpMobilityReport", eps_factor: float) -> d
 def add_place_analysis_elements(
     dpmreport: "DpMobilityReport",
     eps_factor: float,
+    deltai: float
 ) -> dict:
     place_analysis_elements: dict = {}
 
@@ -139,7 +142,7 @@ def add_place_analysis_elements(
             const.VISITS_PER_TILE
         ] = place_analysis.get_visits_per_tile(
             dpmreport,
-            _get_eps(eps_factor, const.VISITS_PER_TILE, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.VISITS_PER_TILE, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.VISITS_PER_TIME_TILE in const.PLACE_ELEMENTS) and (
@@ -149,7 +152,7 @@ def add_place_analysis_elements(
             const.VISITS_PER_TIME_TILE
         ] = place_analysis.get_visits_per_time_tile(
             dpmreport,
-            _get_eps(eps_factor, const.VISITS_PER_TIME_TILE, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.VISITS_PER_TIME_TILE, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
     return place_analysis_elements
 
@@ -158,6 +161,7 @@ def add_od_analysis_elements(
     dpmreport: "DpMobilityReport",
     _od_shape: DataFrame,
     eps_factor: float,
+    deltai: float
 ) -> dict:
     od_analysis_elements: dict = {}
 
@@ -167,7 +171,7 @@ def add_od_analysis_elements(
         od_analysis_elements[const.OD_FLOWS] = od_analysis.get_od_flows(
             _od_shape,
             dpmreport,
-            _get_eps(eps_factor, const.OD_FLOWS, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.OD_FLOWS, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.TRAVEL_TIME in const.OD_ELEMENTS) and (
@@ -176,7 +180,7 @@ def add_od_analysis_elements(
         od_analysis_elements[const.TRAVEL_TIME] = od_analysis.get_travel_time(
             _od_shape,
             dpmreport,
-            _get_eps(eps_factor, const.TRAVEL_TIME, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.TRAVEL_TIME, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.JUMP_LENGTH in const.OD_ELEMENTS) and (
@@ -185,14 +189,14 @@ def add_od_analysis_elements(
         od_analysis_elements[const.JUMP_LENGTH] = od_analysis.get_jump_length(
             _od_shape,
             dpmreport,
-            _get_eps(eps_factor, const.JUMP_LENGTH, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.JUMP_LENGTH, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     return od_analysis_elements
 
 
 def add_user_analysis_elements(
-    dpmreport: "DpMobilityReport", eps_factor: float
+    dpmreport: "DpMobilityReport", eps_factor: float,  deltai: float
 ) -> dict:
     user_analysis_elements = {}
     if (const.TRIPS_PER_USER in const.USER_ELEMENTS) and (
@@ -200,7 +204,7 @@ def add_user_analysis_elements(
     ):
         user_analysis_elements[const.TRIPS_PER_USER] = user_analysis.get_trips_per_user(
             dpmreport,
-            _get_eps(eps_factor, const.TRIPS_PER_USER, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.TRIPS_PER_USER, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.USER_TIME_DELTA in const.USER_ELEMENTS) and (
@@ -210,7 +214,7 @@ def add_user_analysis_elements(
             const.USER_TIME_DELTA
         ] = user_analysis.get_user_time_delta(
             dpmreport,
-            _get_eps(eps_factor, const.USER_TIME_DELTA, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.USER_TIME_DELTA, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.RADIUS_OF_GYRATION in const.USER_ELEMENTS) and (
@@ -220,7 +224,7 @@ def add_user_analysis_elements(
             const.RADIUS_OF_GYRATION
         ] = user_analysis.get_radius_of_gyration(
             dpmreport,
-            _get_eps(eps_factor, const.RADIUS_OF_GYRATION, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.RADIUS_OF_GYRATION, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.USER_TILE_COUNT in const.USER_ELEMENTS) and (
@@ -230,7 +234,7 @@ def add_user_analysis_elements(
             const.USER_TILE_COUNT
         ] = user_analysis.get_user_tile_count(
             dpmreport,
-            _get_eps(eps_factor, const.USER_TILE_COUNT, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.USER_TILE_COUNT, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
 
     if (const.MOBILITY_ENTROPY in const.USER_ELEMENTS) and (
@@ -240,6 +244,6 @@ def add_user_analysis_elements(
             const.MOBILITY_ENTROPY
         ] = user_analysis.get_mobility_entropy(
             dpmreport,
-            _get_eps(eps_factor, const.MOBILITY_ENTROPY, dpmreport.budget_split, dpmreport.gaussian),
+            _get_eps(eps_factor, const.MOBILITY_ENTROPY, dpmreport.budget_split, dpmreport.gaussian), deltai
         )
     return user_analysis_elements
