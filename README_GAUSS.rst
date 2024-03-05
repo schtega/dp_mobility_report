@@ -47,9 +47,12 @@ TODO
 
 * Add delta and Gauss to html report
 * add default value to delta
+* check confidential Interval and delta
+
 
 
 **Evaluation**:
+* exclude exponential bounds for evaluation?
 
 
 

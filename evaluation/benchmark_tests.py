@@ -24,7 +24,7 @@ benchmarkreport = BenchmarkReport(
     tessellation=tessellation,
     privacy_budget_base=None,
     privacy_budget_alternative=1,
-    max_trips_per_user_base=None,
+    max_trips_per_user_base=5,
     max_trips_per_user_alternative=5,
     gaussian=True,
     gaussian_alternative=True,
@@ -49,7 +49,7 @@ benchmarkreport = BenchmarkReport(
     tessellation=tessellation,
     privacy_budget_base=None,
     privacy_budget_alternative=1,
-    max_trips_per_user_base=None,
+    max_trips_per_user_base=5,
     max_trips_per_user_alternative=5,
     seed_sampling=1,
     # exclude analyses that you are not interested in, so save privacy budget
