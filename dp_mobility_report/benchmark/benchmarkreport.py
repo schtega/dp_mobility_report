@@ -58,7 +58,13 @@ class BenchmarkReport:
         subtitle: Custom subtitle that appears at the top of the HTML report. Defaults to ``None``.
         disable_progress_bar: Whether progress bars should be shown. Defaults to ``False``.
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
-        evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``."""
+        evalu (bool, optional): Parameter only needed for development and evaluation purposes. Defaults to ``False``.
+        gaussian: Whether the Gaussian Mechanism should be applied instead of LaPlace. Defaults to ``False``.
+        delta: The probability of failing to achieve epsilon-dp. Only needed if Gaussian Mechanism is chosen. Has to be of type float and in range (0,1].  Defaults to ``None``. i.e. standard Noise Mechanisms are used
+        delta_alternative: The probability of failing to achieve epsilon-dp. Only needed if Gaussian Mechanism is chosen. Has to be of type float and in range (0,1].  Defaults to ``None``. i.e. standard Noise Mechanisms are used"""
+
+
+
 
     _report_base: DpMobilityReport
     _report_alternative: DpMobilityReport
@@ -104,6 +110,10 @@ class BenchmarkReport:
         disable_progress_bar: bool = False,
         seed_sampling: int = None,
         evalu: bool = False,
+        gaussian: bool = False,
+        gaussian_alternative: bool = False,
+        delta: Union[float, None] = None,
+        delta_alternative: Union[float, None] = None
     ) -> None:
 
         self.disable_progress_bar = disable_progress_bar
@@ -132,6 +142,8 @@ class BenchmarkReport:
             disable_progress_bar=disable_progress_bar,
             seed_sampling=seed_sampling,
             evalu=evalu,
+            gaussian=gaussian,
+            delta=delta
         )
         self.report_base.report
 
@@ -162,6 +174,8 @@ class BenchmarkReport:
             disable_progress_bar=disable_progress_bar,
             seed_sampling=seed_sampling,
             evalu=evalu,
+            gaussian=gaussian_alternative,
+            delta=delta_alternative
         )
         self.report_alternative.report
 
