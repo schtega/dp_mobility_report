@@ -81,122 +81,27 @@ class BenchmarkReport:
 
     def __init__(
         self,
-        df_base: DataFrame,
-        base_report: Optional[DpMobilityReport.report] = None,
-        alternative_report: Optional[DpMobilityReport.report] = None,
+        base_report: DpMobilityReport.report = None,
+        alternative_report: DpMobilityReport.report= None,
         tessellation: Optional[GeoDataFrame] = None,
-        df_alternative: Optional[DataFrame] = None,
-        privacy_budget_base: Optional[Union[int, float]] = None,
-        privacy_budget_alternative: Optional[Union[int, float]] = None,
-        user_privacy_base: bool = True,
-        user_privacy_alternative: bool = True,
-        max_trips_per_user_base: Optional[int] = None,
-        max_trips_per_user_alternative: Optional[int] = None,
-        analysis_selection: Optional[List[str]] = None,
         analysis_exclusion: Optional[List[str]] = None,
-        budget_split_base: dict = {},
-        budget_split_alternative: dict = {},
-        timewindows: Union[List[int], np.ndarray] = [2, 6, 10, 14, 18, 22],
-        max_travel_time: int = 120,
-        bin_range_travel_time: int = 5,
-        max_jump_length: Union[int, float] = 10,
-        bin_range_jump_length: Union[int, float] = 1,
-        max_radius_of_gyration: Union[int, float] = 5,
-        bin_range_radius_of_gyration: Union[int, float] = 0.5,
-        max_user_tile_count: int = 10,
-        bin_range_user_tile_count: int = 1,
-        max_user_time_delta: Union[int, float] = 48,
-        bin_range_user_time_delta: Union[int, float] = 4,
+
         top_n_ranking: List[int] = [10, 50, 100],
         measure_selection: dict = None,
-        subtitle: str = None,
         disable_progress_bar: bool = False,
-        seed_sampling: int = None,
-        evalu: bool = False,
-        gaussian: bool = False,
-        gaussian_alternative: bool = False,
-        delta: Union[float, None] = None,
-        delta_alternative: Union[float, None] = None,
-        evalu_analysis_selection_count: Optional[int] = None,
-        evalu_analysis_selection_count_alternative: Optional[int] = None,
     ) -> None:
 
         self.disable_progress_bar = disable_progress_bar
-
-        self._report_base = DpMobilityReport(
-            df=df_base,
-            tessellation=tessellation,
-            privacy_budget=privacy_budget_base,
-            user_privacy=user_privacy_base,
-            max_trips_per_user=max_trips_per_user_base,
-            analysis_selection=analysis_selection,
-            analysis_exclusion=analysis_exclusion,
-            budget_split=budget_split_base,
-            timewindows=timewindows,
-            max_travel_time=max_travel_time,
-            bin_range_travel_time=bin_range_travel_time,
-            max_jump_length=max_jump_length,
-            bin_range_jump_length=bin_range_jump_length,
-            max_radius_of_gyration=max_radius_of_gyration,
-            bin_range_radius_of_gyration=bin_range_radius_of_gyration,
-            max_user_tile_count=max_user_tile_count,
-            bin_range_user_tile_count=bin_range_user_tile_count,
-            max_user_time_delta=max_user_time_delta,
-            bin_range_user_time_delta=bin_range_user_time_delta,
-            subtitle=subtitle,
-            disable_progress_bar=disable_progress_bar,
-            seed_sampling=seed_sampling,
-            evalu=evalu,
-            gaussian=gaussian,
-            delta=delta,
-            evalu_analysis_selection_count=evalu_analysis_selection_count
-        )
-        self.report_base.report
-
-        if df_alternative is None:
-            df_alternative = df_base
-
-        self._report_alternative = DpMobilityReport(
-            df=df_alternative,
-            tessellation=tessellation,
-            privacy_budget=privacy_budget_alternative,
-            user_privacy=user_privacy_alternative,
-            max_trips_per_user=max_trips_per_user_alternative,
-            analysis_selection=analysis_selection,
-            analysis_exclusion=analysis_exclusion,
-            budget_split=budget_split_alternative,
-            timewindows=timewindows,
-            max_travel_time=max_travel_time,
-            bin_range_travel_time=bin_range_travel_time,
-            max_jump_length=max_jump_length,
-            bin_range_jump_length=bin_range_jump_length,
-            max_radius_of_gyration=max_radius_of_gyration,
-            bin_range_radius_of_gyration=bin_range_radius_of_gyration,
-            max_user_tile_count=max_user_tile_count,
-            bin_range_user_tile_count=bin_range_user_tile_count,
-            max_user_time_delta=max_user_time_delta,
-            bin_range_user_time_delta=bin_range_user_time_delta,
-            subtitle=subtitle,
-            disable_progress_bar=disable_progress_bar,
-            seed_sampling=seed_sampling,
-            evalu=evalu,
-            gaussian=gaussian_alternative,
-            delta=delta_alternative,
-            evalu_analysis_selection_count=evalu_analysis_selection_count_alternative
-        )
-        self.report_alternative.report
-
-        self.analysis_exclusion = preprocessing.combine_analysis_exclusion(
-            self.report_alternative.analysis_exclusion,
-            self.report_base.analysis_exclusion,
-        )
-
+        self.base_report = base_report
+        self.alternative_report = alternative_report
+        self.analysis_exclusion = analysis_exclusion
+        self.tessellation = tessellation
         (
-            self.report_base._report,
-            self.report_alternative._report,
+            self.base_report,
+            self.alternative_report,
         ) = preprocessing.unify_histogram_bins(
-            self.report_base.report,
-            self.report_alternative.report,
+            self.base_report,
+            self.alternative_report,
             self.analysis_exclusion,
         )
 
@@ -222,9 +127,9 @@ class BenchmarkReport:
             self._top_n_cov,
         ) = compute_similarity_measures(
             self.analysis_exclusion,
-            self.report_alternative.report,
-            self.report_base.report,
-            self.report_base.tessellation,
+            self.alternative_report,
+            self.base_report,
+            self.tessellation,
             self.top_n_ranking,
             self.disable_progress_bar,
         )

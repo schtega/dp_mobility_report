@@ -49,8 +49,8 @@ class DpMobilityReport:
         seed_sampling: Provide seed for down-sampling of dataset (according to ``max_trips_per_user``) so that the sampling is reproducible. Defaults to ``None``, i.e., no seed.
         evalu: Parameter only needed for development and evaluation purposes. Defaults to ``False``.
         gaussian: Whether the Gaussian Mechanism should be applied instead of LaPlace. Defaults to ``False``.
-        delta: The probability of failing to achieve epsilon-dp. Only needed if Gaussian Mechanism is chosen. Has to be of type float and in range (0,1].  Defaults to ``None``. i.e. standard Noise Mechanisms are used"""
-
+        delta: The probability of failing to achieve epsilon-dp. Only needed if Gaussian Mechanism is chosen. Has to be of type float and in range (0,1].  Defaults to ``None``. i.e. standard Noise Mechanisms are used
+        evalu_analysis_selection_count: Fake count of selcted analyses for evaluation purposes. Defaults to ``None``."""
     _report: dict = {}
     _html: str = ""
     _df: DataFrame
@@ -86,7 +86,8 @@ class DpMobilityReport:
         seed_sampling: int = None,
         evalu: bool = False,
         gaussian: bool = False,
-        delta: Union[float, None] = None
+        delta: Union[float, None] = None,
+        evalu_analysis_selection_count: Optional[int] = None,
     ) -> None:
         preprocessing.validate_input(
             df,
@@ -112,7 +113,8 @@ class DpMobilityReport:
             bin_range_user_time_delta,
             seed_sampling,
             gaussian,
-            delta
+            delta,
+            evalu_analysis_selection_count
         )
 
         (
@@ -189,6 +191,7 @@ class DpMobilityReport:
             budget_split, self._analysis_exclusion
         )
         self.evalu = evalu
+        self.evalu_analysis_selection_count = evalu_analysis_selection_count
         self.disable_progress_bar = disable_progress_bar
         self.subtitle = subtitle
         self.gaussian = gaussian

@@ -26,7 +26,7 @@ def _resample_to_prec(
     if current_precision == target_precision:
         return df
     precision_names = {
-        const.PREC_MONTH: "M",
+        const.PREC_MONTH: "ME",
         const.PREC_WEEK: "W-MON",
         const.PREC_DATE: "1D",
     }

@@ -64,7 +64,8 @@ def validate_input(
     bin_range_user_time_delta: Optional[Union[int, float]],
     seed_sampling: Optional[int],
     gaussian: bool,
-    delta: Union[float, None]
+    delta: Union[float, None],
+    evalu_analysis_selection_count: Optional[int] = None,
 ) -> None:
     if not isinstance(df, DataFrame):
         raise TypeError("'df' is not a Pandas DataFrame.")
@@ -155,6 +156,9 @@ def validate_input(
     _validate_int_greater_zero(
         bin_range_user_tile_count, f"{bin_range_user_tile_count=}".split("=")[0]
     )
+    _validate_int_greater_zero(
+        evalu_analysis_selection_count, f"{evalu_analysis_selection_count=}".split("=")[0]
+    )
     _validate_numeric_greater_zero(
         max_user_time_delta, f"{max_user_time_delta=}".split("=")[0]
     )
@@ -171,8 +175,12 @@ def validate_input(
         warnings.warn("Input parameter 'delta' is set, but will never be used because gaussian is not chosen")
     if gaussian and (delta is None):
         warnings.warn("No delta value is set and therefore a default value will be set.")
-    _validate_delta(delta, f"{delta=}".split("=")[0]
-    )
+    _validate_delta(delta, f"{delta=}".split("=")[0])
+    if evalu_analysis_selection_count > 16:
+        warnings.warn("There are not more than 16 analyses, therefore this scenario would be unrealistic.")
+    if evalu_analysis_selection_count is 0:
+        raise ValueError("'evalu_analysis_selection_count' can not be 0 because 0 would not be realistic.")
+
 
 def _validate_delta(var: Any, name: str)-> None:
     if not ((var is None) or isinstance(var, float)):
