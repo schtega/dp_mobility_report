@@ -8,7 +8,8 @@ import numpy as np
 import geopandas as gpd
 
 import config
-from dp_mobility_report import DpMobilityReport
+from dp_mobility_report import DpMobilityReport, constants
+from dp_mobility_report import constants as const
 from dp_mobility_report.benchmark.benchmarkreport import BenchmarkReport
 from dp_mobility_report.model import preprocessing
 
@@ -102,7 +103,8 @@ for dataset_name in config.DATASET_NAMES:
                         tessellation=tessellation,
                         privacy_budget_base=None,
                         analysis_selection=[
-                            "overview",
+                            #const.PLACE_ANALYSIS,
+                            const.OVERVIEW
                         ],
                         privacy_budget_alternative=1,
                         max_trips_per_user_base=5,
@@ -115,12 +117,12 @@ for dataset_name in config.DATASET_NAMES:
                         # exclude analyses that you are not interested in, so save privacy budget
                         # analysis_inclusion # can be used instead of anaylsis_exclusion
                         # custom split of the privacy budget: to allocate more budget for certain analyses
-                        subtitle="Berlin Benchmark report Gauss",
+                        subtitle="Geolife Benchmark report Gauss",
                         # provide a meaningful subtitle for your report readers
                     )
                     similarity_measures[key(gauss, count, i)] = pd.Series(
                         benchmark.similarity_measures
-                    ).round(3)
+                    ).round(5)
 
                 '''
                 similarity_measures_avg[key(gauss, count)] = (
@@ -140,7 +142,7 @@ for dataset_name in config.DATASET_NAMES:
                 '''
                 pbar.update()
         similarity_measures.to_csv(
-            os.path.join(df_output_path, dataset_name + "_all_reps.csv"),
+            os.path.join(df_output_path, dataset_name + "_all_reps_overview.csv"),
             index_label="stat",
         )
         '''
