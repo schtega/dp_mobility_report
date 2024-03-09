@@ -176,9 +176,9 @@ def validate_input(
     if gaussian and (delta is None):
         warnings.warn("No delta value is set and therefore a default value will be set.")
     _validate_delta(delta, f"{delta=}".split("=")[0])
-    if evalu_analysis_selection_count > 16:
+    if (evalu_analysis_selection_count is not None) and (evalu_analysis_selection_count > 16):
         warnings.warn("There are not more than 16 analyses, therefore this scenario would be unrealistic.")
-    if evalu_analysis_selection_count is 0:
+    if evalu_analysis_selection_count == 0:
         raise ValueError("'evalu_analysis_selection_count' can not be 0 because 0 would not be realistic.")
 
 

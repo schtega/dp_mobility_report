@@ -64,9 +64,6 @@ class BenchmarkReport:
         delta_alternative: The probability of failing to achieve epsilon-dp. Only needed if Gaussian Mechanism is chosen. Has to be of type float and in range (0,1].  Defaults to ``None``. i.e. standard Noise Mechanisms are used
         evalu_analysis_selection_count: Fake count of selcted analyses for evaluation purposes. Defaults to ``None``."""
 
-
-
-
     _report_base: DpMobilityReport
     _report_alternative: DpMobilityReport
     _smape: dict
@@ -82,8 +79,6 @@ class BenchmarkReport:
     def __init__(
         self,
         df_base: DataFrame,
-        base_report: Optional[DpMobilityReport.report] = None,
-        alternative_report: Optional[DpMobilityReport.report] = None,
         tessellation: Optional[GeoDataFrame] = None,
         df_alternative: Optional[DataFrame] = None,
         privacy_budget_base: Optional[Union[int, float]] = None,

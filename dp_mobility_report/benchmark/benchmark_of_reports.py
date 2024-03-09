@@ -6,9 +6,12 @@ from typing import List, Optional, Union
 
 import numpy as np
 from geopandas import GeoDataFrame
+import pandas as pd
+from dp_mobility_report import constants as const
 from pandas import DataFrame
 
 from dp_mobility_report.benchmark import b_utils, preprocessing
+from dp_mobility_report.model import preprocessing as prepro_report
 from dp_mobility_report.benchmark.similarity_measures import (
     compute_similarity_measures,
     get_selected_measures,
@@ -81,21 +84,44 @@ class BenchmarkReport:
 
     def __init__(
         self,
-        base_report: DpMobilityReport.report = None,
-        alternative_report: DpMobilityReport.report= None,
+        df: DataFrame,
+        base_report: dict = {},
+        alternative_report: dict= {},
         tessellation: Optional[GeoDataFrame] = None,
-        analysis_exclusion: Optional[List[str]] = None,
+        analysis_exclusion: Optional[List[str]] = None,# TODO how to fix
+        analysis_selection: Optional[List[str]] = None,  # TODO how to fix
 
         top_n_ranking: List[int] = [10, 50, 100],
         measure_selection: dict = None,
         disable_progress_bar: bool = False,
     ) -> None:
 
+        self.df = df
         self.disable_progress_bar = disable_progress_bar
         self.base_report = base_report
         self.alternative_report = alternative_report
         self.analysis_exclusion = analysis_exclusion
         self.tessellation = tessellation
+
+        self.analysis_exclusion = prepro_report.clean_analysis_exclusion(
+            ## haut alle analysen auf die exclusion list, die ungewollt sind oder aufgrund der Datenlage nicht möglich sind.
+            analysis_selection,
+            analysis_exclusion,
+            has_tessellation=(tessellation is not None),            has_points_inside_tessellation=prepro_report.has_points_inside_tessellation(
+                self.df, self.tessellation
+            ),
+            has_timestamps=pd.core.dtypes.common.is_datetime64_dtype(
+                self.df[const.DATETIME]
+            ),
+            has_od_flows=max(self.df[const.TID].value_counts())
+                         > 1,  # are there trips with more than a single record?
+            has_consecutive_user_trips=max(
+                self.df.groupby(const.UID).nunique()[const.TID]
+            )
+                                       > 1,
+        )
+
+
         (
             self.base_report,
             self.alternative_report,

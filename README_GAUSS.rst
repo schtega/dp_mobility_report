@@ -40,6 +40,12 @@ or from GitHub:
 How to use the Report with the Gaussian Mechanism
 =====================================================
 
+Evaluation
+==========
+1. Run compute_reports.py
+2. Run base_reports.py
+
+
 TODO
 ====================
 

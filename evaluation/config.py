@@ -2,7 +2,7 @@ GEOLIFE = "geolife"
 MADRID = "madrid"
 BERLIN = "berlin"
 
-DATASET_NAMES = [BERLIN, GEOLIFE, MADRID]
-path_data = "data"
+DATASET_NAMES = [BERLIN]
+PROCESSED_DATA_PATH = "data"
 REPORT_PATH = "reports"
-path_html_output = "output"
+OUTPUT_PATH = "results"

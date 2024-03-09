@@ -33,7 +33,7 @@ for dataset_name in config.DATASET_NAMES:
 
     # load data
     df = pd.read_csv(
-        os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
+        os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
         dtype={"tile_id": str},
     )
     tessellation = gpd.read_file(
@@ -52,8 +52,8 @@ for dataset_name in config.DATASET_NAMES:
         os.makedirs(ds_report_path)
 
     # Settings
-    gauss_array = [True, False]
-    analysis_counts = [1, 2, 4, 8, 12, 16]
+    gauss_array = [True]
+    analysis_counts = [16]
     reps = 2
     
     # compute reports
@@ -81,18 +81,13 @@ for dataset_name in config.DATASET_NAMES:
                         df,
                         tessellation,
                         privacy_budget=1,
-                        analysis_selection=[
-                            "overview",
-                            "place_analysis",
-                            "od_analysis",
-                            "user_analysis",
-                        ],
                         max_trips_per_user=5,
                         user_privacy=True,
                         disable_progress_bar=True,
                         delta=0.00001,
                         gaussian=gauss,
                         evalu_analysis_selection_count=count,
+                        seed_sampling=1,
                     ).report
                     pbar.update()
                 d.close()

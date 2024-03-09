@@ -1,0 +1,37 @@
+stat,0
+n_records,1.8500346496072915e-05
+n_trips,1.8500346496072915e-05
+n_complete_trips,1.8500346496072915e-05
+n_incomplete_trips,0
+n_users,0.0002059144979646144
+n_locations,0.0021992479357505423
+uid,0
+tid,2.0
+datetime,0
+lat,2.0
+lng,0
+trips_over_time,0.0022764510623572718
+trips_per_weekday,0.002938156119185522
+trips_per_hour,0.008097411968561355
+visits_per_tile,10.814417839050293
+visits_per_tile_quartiles,0.2510640200244594
+visits_per_tile_outliers,0.8387096774193549
+visits_per_tile_ranking,"[1.0, 0.695686274509804, 0.687920792079208]"
+visits_per_time_tile,183.39353561401367
+od_flows,0.49996850593898995
+od_flows_ranking,"[0.9999999999999999, 0.2653061224489796, 0.19313131313131318]"
+od_flows_quartiles,0.6865817000208203
+travel_time,0.005052270735238698
+travel_time_quartiles,0.09763033175355451
+jump_length,0.0008251950885691329
+jump_length_quartiles,0.04258016474506177
+trips_per_user,0.0004428036221664766
+trips_per_user_quartiles,0.0
+user_time_delta,0.007079211437050165
+user_time_delta_quartiles,0.46686065091245477
+radius_of_gyration,0.000780156065805062
+radius_of_gyration_quartiles,0.02193860331220428
+user_tile_count,0.00344746723303545
+user_tile_count_quartiles,0.021052631578947368
+mobility_entropy,0.014601653902367158
+mobility_entropy_quartiles,0.0
