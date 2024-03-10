@@ -104,8 +104,11 @@ for dataset_name in config.DATASET_NAMES:
                         tessellation=tessellation,
                         privacy_budget_base=None,
                         analysis_selection=[
+                            const.OVERVIEW,
                             const.PLACE_ANALYSIS,
-                            #const.OVERVIEW
+                            const.OD_ANALYSIS,
+                            const.USER_ANALYSIS
+
                         ],
                         privacy_budget_alternative=1,
                         max_trips_per_user_base=5,
@@ -143,7 +146,7 @@ for dataset_name in config.DATASET_NAMES:
                 '''
 
         similarity_measures.to_csv(
-            os.path.join(df_output_path, dataset_name + "_all_reps_place_smape.csv"),
+            os.path.join(df_output_path, dataset_name + "_all_reps_smape.csv"),
             index_label="stat",
         )
         '''

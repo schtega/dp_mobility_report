@@ -1,0 +1,5 @@
+stat,gauss_True_count_1,gauss_True_count_2,gauss_True_count_4,gauss_True_count_8,gauss_True_count_12,gauss_True_count_16,gauss_False_count_1,gauss_False_count_2,gauss_False_count_4,gauss_False_count_8,gauss_False_count_12,gauss_False_count_16
+visits_per_tile,0.026,0.018,0.017,0.027,0.031,0.034,0.068,0.023,0.037,0.066,0.087,0.107
+visits_per_tile_outliers,0.941,0.586,1.283,1.33,1.117,1.205,1.258,0.856,1.333,1.845,1.354,1.72
+visits_per_tile_quartiles,0.191,0.163,0.136,0.252,0.229,0.225,0.206,0.198,0.165,0.253,0.253,0.254
+visits_per_time_tile,0.248,0.178,0.216,0.26,0.29,0.312,0.376,0.173,0.265,0.388,0.478,0.537
