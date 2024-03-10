@@ -4,7 +4,7 @@ import pandas as pd
 
 import dp_mobility_report.constants as const
 from dp_mobility_report.model.preprocessing import has_points_inside_tessellation
-from dp_mobility_report.report.html.html_utils import fmt, fmt_config, get_template
+from dp_mobility_report.report.html.html_utils import fmt, fmt_config, get_template, fmt_mechanism, fmt_delta
 
 if TYPE_CHECKING:
     from dp_mobility_report import BenchmarkReport, DpMobilityReport
@@ -106,6 +106,8 @@ def render_config_table(dpmreport: "DpMobilityReport") -> str:
         {"name": "Privacy budget", "value": fmt(dpmreport.privacy_budget)},
         {"name": "User privacy", "value": fmt(dpmreport.user_privacy)},
         {"name": "Budget split", "value": fmt_config(dpmreport.budget_split)},
+        {"name": "Noise Mechanism", "value": fmt_mechanism(dpmreport.gaussian)},
+        {"name": "Delta", "value": fmt_delta(dpmreport.delta)},
         {"name": "Evaluation dev. mode", "value": fmt(dpmreport.evalu)},
         {
             "name": "Excluded analyses",
@@ -148,6 +150,21 @@ def render_benchmark_config_table(benchmarkreport: "BenchmarkReport") -> str:
             "value": (
                 fmt_config(benchmarkreport.report_base.budget_split),
                 fmt_config(benchmarkreport.report_alternative.budget_split),
+            ),
+        },
+
+        {
+            "name": "Noise Mechanism",
+            "value": (
+             fmt_mechanism(benchmarkreport.report_base.gaussian),
+             fmt_mechanism(benchmarkreport.report_alternative.gaussian),
+            ),
+        },
+        {
+            "name": "Delta",
+            "value": (
+             fmt_delta(benchmarkreport.report_base.delta),
+             fmt_delta(benchmarkreport.report_alternative.delta),
             ),
         },
         {

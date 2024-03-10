@@ -147,6 +147,32 @@ def fmt(value: Any, target_type: Optional[type] = None) -> Any:
     return value
 
 
+def fmt_delta(value: Any, target_type: Optional[type] = None) -> Any:
+    if (value is None) or (
+        isinstance(value, (float, np.floating, int, np.integer)) and math.isnan(value)
+    ):
+        return "-"
+    if target_type and (value is not None):
+        value = target_type(value)
+    if isinstance(value, (float, np.floating)):
+        if math.isinf(value) or np.isnan(value):
+            return "not defined"
+    if isinstance(value, (float, np.floating, int, np.integer)) and not isinstance(
+        value, bool
+    ):
+        value = f"{value:,}"
+    return value
+
+
+def fmt_mechanism(value: bool | None) -> Any:
+    if value is None:
+        return "not defined"
+    if value:
+        return "Gaussian Mechanism"
+    else:
+        return "LaPlace Mechanism"
+
+
 def fmt_moe(margin_of_error: Optional[float]) -> str:
     if (margin_of_error is None) or (margin_of_error == 0):
         return "0.0"
