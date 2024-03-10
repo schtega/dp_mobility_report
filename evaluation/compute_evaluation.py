@@ -35,7 +35,8 @@ for dataset_name in config.DATASET_NAMES:
 
     # load data
     df = pd.read_csv(
-        os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
+        #os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
+        os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
         dtype={"tile_id": str},
     )
     tessellation = gpd.read_file(
@@ -117,12 +118,13 @@ for dataset_name in config.DATASET_NAMES:
                         # exclude analyses that you are not interested in, so save privacy budget
                         # analysis_inclusion # can be used instead of anaylsis_exclusion
                         # custom split of the privacy budget: to allocate more budget for certain analyses
-                        subtitle="Geolife Benchmark report Gauss",
+                        subtitle="Madrid Benchmark report Gauss",
                         # provide a meaningful subtitle for your report readers
                     )
                     similarity_measures[key(gauss, count, i)] = pd.Series(
                         benchmark.similarity_measures
                     ).round(5)
+                    pbar.update()
 
                 '''
                 similarity_measures_avg[key(gauss, count)] = (
@@ -140,7 +142,7 @@ for dataset_name in config.DATASET_NAMES:
                     .round(3)
                 )
                 '''
-                pbar.update()
+
         similarity_measures.to_csv(
             os.path.join(df_output_path, dataset_name + "_all_reps_overview.csv"),
             index_label="stat",

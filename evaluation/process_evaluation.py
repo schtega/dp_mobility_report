@@ -2,8 +2,10 @@ import pandas as pd
 import config
 import os
 
-dataset_name = "berlin_all_reps_place"
-df_output_path = os.path.join(config.OUTPUT_PATH, "tables", "berlin")
+
+dataset= "geolife"
+dataset_name = dataset+"_all_reps_overview_smape"
+df_output_path = os.path.join(config.OUTPUT_PATH, "tables", dataset)
 #berlin_overview = pd.Series.from_csv("tables/berlin/" + dataset_name + ".csv")
 
 rows_to_skip_labels = ['visits_per_tile_ranking', 'od_flows_ranking']  #  skip rows with these labels
@@ -12,7 +14,7 @@ rows_to_skip_labels = ['visits_per_tile_ranking', 'od_flows_ranking']  #  skip r
 def should_skip_row(row):
     return row.name in rows_to_skip_labels
 
-berlin_overview = pd.read_csv(os.path.join(df_output_path, dataset_name + ".csv"), index_col=0, skiprows=[4])
+berlin_overview = pd.read_csv(os.path.join(df_output_path, dataset_name + ".csv"), index_col=0, skiprows=[])
 
 data_to_process = berlin_overview
 
@@ -50,7 +52,7 @@ for gauss in gauss_array:
             .T.std()
             .round(3)
         )
-df_output_path = os.path.join(config.OUTPUT_PATH, "tables", "berlin")
+df_output_path = os.path.join(config.OUTPUT_PATH, "tables", dataset)
 if not os.path.exists(df_output_path):
     os.makedirs(df_output_path)
 
