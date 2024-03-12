@@ -35,8 +35,8 @@ for dataset_name in config.DATASET_NAMES:
 
     # load data
     df = pd.read_csv(
-        #os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
-        os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
+        os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
+        #os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
         dtype={"tile_id": str},
     )
     tessellation = gpd.read_file(
@@ -105,9 +105,9 @@ for dataset_name in config.DATASET_NAMES:
                         privacy_budget_base=None,
                         analysis_selection=[
                             #const.OVERVIEW,
-                            #const.PLACE_ANALYSIS,
-                            const.OD_ANALYSIS,
-                            const.USER_ANALYSIS
+                            const.PLACE_ANALYSIS,
+                            #const.OD_ANALYSIS,
+                            #const.USER_ANALYSIS
 
                         ],
                         privacy_budget_alternative=1,
@@ -146,7 +146,7 @@ for dataset_name in config.DATASET_NAMES:
                 '''
 
         similarity_measures.to_csv(
-            os.path.join(df_output_path, dataset_name + "_all_reps_smape.csv"),
+            os.path.join(df_output_path, dataset_name + "_all_reps_place_smape.csv"),
             index_label="stat",
         )
         '''
