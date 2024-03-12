@@ -1,4 +1,5 @@
 import calendar
+import math
 from datetime import timedelta
 from typing import TYPE_CHECKING, Optional
 
@@ -17,8 +18,10 @@ from dp_mobility_report.privacy import diff_privacy
 def get_dataset_statistics(
     dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> DictSection:
-    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, 4)  ## nur durch 4, weil 2 von 6 Statistiken von den anderen abhängig sind
     gaussian = dpmreport.gaussian
+
+    element_count = math.sqrt(4) if gaussian else element_count = 4
+    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, element_count)  ## nur durch 4, weil 2 von 6 Statistiken von den anderen abhängig sind
     deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, 4)
 
     # counts for complete and incomplete trips
@@ -114,8 +117,10 @@ def get_missing_values(
     dpmreport: "DpMobilityReport", eps: Optional[float], delta: Optional[float]
 ) -> DictSection:
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
-    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, len(columns))
+
     gaussian = dpmreport.gaussian
+    element_count = math.sqrt(len(columns)) if gaussian else element_count = len(columns)
+    epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, element_count)
     deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, len(columns))
 
     missings = dict((len(dpmreport.df) - dpmreport.df.count())[columns])
