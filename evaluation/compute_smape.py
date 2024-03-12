@@ -34,11 +34,19 @@ for dataset_name in config.DATASET_NAMES:
         continue
 
     # load data
-    df = pd.read_csv(
-        os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
-        #os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
-        dtype={"tile_id": str},
-    )
+    if dataset_name == "berlin":
+        df = pd.read_csv(
+            os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
+            #os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
+            dtype={"tile_id": str},
+        )
+    else:
+        df = pd.read_csv(
+            #os.path.join(config.PROCESSED_DATA_PATH, "berlin_w_tile_id" + ".csv"),
+            os.path.join(config.PROCESSED_DATA_PATH, dataset_name + ".csv"),
+            dtype={"tile_id": str},
+        )
+
     tessellation = gpd.read_file(
         os.path.join(config.PROCESSED_DATA_PATH, dataset_name + "_tessellation.gpkg"),
         dtype={"tile_id": str},
@@ -67,7 +75,7 @@ for dataset_name in config.DATASET_NAMES:
     # Settings
     gauss_array = [True, False]
     #gauss_array = [True]
-    analysis_counts = [1,2,4,8,12,16]
+    analysis_counts = [1,2,4,6,8,10,12,14]
     #analysis_counts = [16]
     reps = 8
 
@@ -104,8 +112,8 @@ for dataset_name in config.DATASET_NAMES:
                         tessellation=tessellation,
                         privacy_budget_base=None,
                         analysis_selection=[
-                            #const.OVERVIEW,
-                            const.PLACE_ANALYSIS,
+                            const.OVERVIEW,
+                            #const.PLACE_ANALYSIS,
                             #const.OD_ANALYSIS,
                             #const.USER_ANALYSIS
 
@@ -126,7 +134,7 @@ for dataset_name in config.DATASET_NAMES:
                     )
                     similarity_measures[key(gauss, count, i)] = pd.Series(
                         benchmark.smape
-                    ).round(5)
+                    ).round(7)
                     pbar.update()
                 '''
                 similarity_measures_avg[key(gauss, count)] = (
@@ -146,7 +154,7 @@ for dataset_name in config.DATASET_NAMES:
                 '''
 
         similarity_measures.to_csv(
-            os.path.join(df_output_path, dataset_name + "_all_reps_place_smape.csv"),
+            os.path.join(df_output_path, dataset_name + "_all_reps_overview_smape.csv"),
             index_label="stat",
         )
         '''

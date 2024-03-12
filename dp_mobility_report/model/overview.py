@@ -20,7 +20,10 @@ def get_dataset_statistics(
 ) -> DictSection:
     gaussian = dpmreport.gaussian
 
-    element_count = math.sqrt(4) if gaussian else element_count = 4
+    if gaussian:
+        element_count = math.sqrt(4)
+    else:
+        element_count = 4
     epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, element_count)  ## nur durch 4, weil 2 von 6 Statistiken von den anderen abhängig sind
     deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, 4)
 
@@ -119,7 +122,10 @@ def get_missing_values(
     columns = [const.UID, const.TID, const.DATETIME, const.LAT, const.LNG]
 
     gaussian = dpmreport.gaussian
-    element_count = math.sqrt(len(columns)) if gaussian else element_count = len(columns)
+    if gaussian:
+        element_count = math.sqrt(len(columns))
+    else:
+        element_count = len(columns)
     epsi = m_utils.get_epsi_or_deltai(dpmreport.evalu, eps, element_count)
     deltai = m_utils.get_epsi_or_deltai(dpmreport.evalu, delta, len(columns))
 
