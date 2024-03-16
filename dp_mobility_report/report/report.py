@@ -32,7 +32,10 @@ def report_elements(dpmreport: "DpMobilityReport") -> dict:
         budget_split_sum = dpmreport.evalu_analysis_selection_count
     if dpmreport.gaussian:
         budget_split_sum = math.sqrt(budget_split_sum)
-        deltai = dpmreport.delta/(len(const.ELEMENTS) - len(dpmreport.analysis_exclusion))
+        if dpmreport.evalu_analysis_selection_count:
+            deltai = dpmreport.delta / dpmreport.evalu_analysis_selection_count
+        else:
+            deltai = dpmreport.delta/(len(const.ELEMENTS) - len(dpmreport.analysis_exclusion))
     else:
         deltai = None
 
