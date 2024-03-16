@@ -4,7 +4,7 @@ import os
 
 for dataset in config.DATASET_NAMES:
 
-    dataset_name = dataset+"_all_reps_overview_smape"
+    dataset_name = dataset+"_all_reps_place_smape"
     df_output_path = os.path.join(config.OUTPUT_PATH, "tables", dataset)
     #berlin_overview = pd.Series.from_csv("tables/berlin/" + dataset_name + ".csv")
 
