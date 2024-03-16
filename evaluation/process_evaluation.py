@@ -4,7 +4,7 @@ import os
 
 
 dataset= "berlin"
-dataset_name = dataset+"_all_reps_place_smape"
+dataset_name = dataset+"_all_reps_overview_smape"
 df_output_path = os.path.join(config.OUTPUT_PATH, "tables", dataset)
 #berlin_overview = pd.Series.from_csv("tables/berlin/" + dataset_name + ".csv")
 
@@ -28,7 +28,7 @@ def key(gauss, count, rep=None):
 # Settings
 gauss_array = [True, False]
 # gauss_array = [True]
-analysis_counts = [1, 2, 4, 8, 12, 16]
+analysis_counts = [1, 2, 4, 8, 10, 12, 14]
 # analysis_counts = [16]
 reps = 8
 
