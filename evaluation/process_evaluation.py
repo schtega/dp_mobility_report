@@ -4,7 +4,7 @@ import os
 
 for dataset in config.DATASET_NAMES:
 
-    dataset_name = dataset+"_all_reps_place_smape"
+    dataset_name = dataset+"_all_reps_overview_smape"
     df_output_path = os.path.join(config.OUTPUT_PATH, "tables", dataset)
     #berlin_overview = pd.Series.from_csv("tables/berlin/" + dataset_name + ".csv")
 
@@ -20,7 +20,7 @@ for dataset in config.DATASET_NAMES:
 
     def key(gauss, count, rep=None):
         if rep is None:
-            return "gauss_" + str(gauss) + "_count_" + str(count)
+            return "gauss_" + str(gauss) + "_count_" + str(count) + "_"
         else:
             return "gauss_" + str(gauss) + "_count_" + str(count) + "_rep_" + str(rep)
 
@@ -43,14 +43,14 @@ for dataset in config.DATASET_NAMES:
                 :, data_to_process.columns.str.startswith(key(gauss, count))
                 ]
                 .T.mean()
-                .round(3)
+                .round(5)
             )
             similarity_measures_std[key(gauss, count)] = (
                 data_to_process.loc[
                 :, data_to_process.columns.str.startswith(key(gauss, count))
                 ]
                 .T.std()
-                .round(3)
+                .round(5)
             )
     df_output_path = os.path.join(config.OUTPUT_PATH, "tables", dataset)
     if not os.path.exists(df_output_path):
