@@ -7,8 +7,9 @@ import pandas as pd
 from dp_mobility_report import DpMobilityReport
 
 # set paths to data and output (either with config file or hardcoded)
-path_data = config.path_data
-path_html_output = config.path_html_output
+path_data = config.PROCESSED_DATA_PATH
+path_html_output = config.OUTPUT_PATH
+
 
 if not os.path.exists(path_html_output):
     os.makedirs(path_html_output)
@@ -28,14 +29,18 @@ report = DpMobilityReport(
     gaussian=True,
     delta=0.00001,
     subtitle="Berlin Dataset - privacy - gauss",
+    evalu_analysis_selection_count=1
 )
 report.to_file(os.path.join(path_html_output, "berlin_gauss.html"), top_n_flows=300)
 
 report = DpMobilityReport(
     df,
     tessellation,
-    privacy_budget=None,
+    privacy_budget=1,
     max_trips_per_user=5,
-    subtitle="Berlin Dataset - no privacy ",
+    gaussian=True,
+    delta=0.00001,
+    subtitle="Berlin Dataset - privacy - gauss",
+    evalu_analysis_selection_count=2
 )
 report.to_file(os.path.join(path_html_output, "berlin_noPrivacy_gauss.html"), top_n_flows=300)

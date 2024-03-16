@@ -75,7 +75,7 @@ for dataset_name in config.DATASET_NAMES:
     # Settings
     gauss_array = [True, False]
     #gauss_array = [True]
-    analysis_counts = [1,2,4,6,8,10,12,14]
+    analysis_counts = [1,3,5,7,9,11,13,15]
     #analysis_counts = [16]
     reps = 8
 
@@ -113,8 +113,8 @@ for dataset_name in config.DATASET_NAMES:
                         privacy_budget_base=None,
                         analysis_selection=[
                             #const.OVERVIEW,
-                            #const.PLACE_ANALYSIS,
-                            const.OD_ANALYSIS,
+                            const.PLACE_ANALYSIS,
+                            #const.OD_ANALYSIS,
                             #const.USER_ANALYSIS
 
                         ],
@@ -154,7 +154,7 @@ for dataset_name in config.DATASET_NAMES:
                 '''
 
         similarity_measures.to_csv(
-            os.path.join(df_output_path, dataset_name + "_all_reps_od_smape.csv"),
+            os.path.join(df_output_path, dataset_name + "_all_reps_place_smape.csv"),
             index_label="stat",
         )
         '''

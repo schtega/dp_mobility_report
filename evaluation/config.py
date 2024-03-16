@@ -2,7 +2,7 @@ GEOLIFE = "geolife"
 MADRID = "madrid"
 BERLIN = "berlin"
 
-DATASET_NAMES = [GEOLIFE]
+DATASET_NAMES = [GEOLIFE, MADRID,BERLIN]
 PROCESSED_DATA_PATH = "data"
 REPORT_PATH = "reports"
-OUTPUT_PATH = "fixed_results"
+OUTPUT_PATH = "delta_results"

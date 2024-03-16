@@ -31,7 +31,7 @@ benchmarkreport = BenchmarkReport(
     delta_alternative=0.00001,
     delta=0.00001,
     seed_sampling=1,
-    evalu_analysis_selection_count_alternative= 16,
+    evalu_analysis_selection_count_alternative= 1,
     # exclude analyses that you are not interested in, so save privacy budget
     # analysis_inclusion # can be used instead of anaylsis_exclusion
     # custom split of the privacy budget: to allocate more budget for certain analyses
