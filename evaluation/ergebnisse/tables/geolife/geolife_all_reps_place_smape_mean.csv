@@ -1,0 +1,5 @@
+stat,gauss_True_count_1_,gauss_True_count_3_,gauss_True_count_5_,gauss_True_count_7_,gauss_True_count_9_,gauss_True_count_11_,gauss_True_count_13_,gauss_True_count_15_,gauss_False_count_1_,gauss_False_count_3_,gauss_False_count_5_,gauss_False_count_7_,gauss_False_count_9_,gauss_False_count_11_,gauss_False_count_13_,gauss_False_count_15_
+visits_per_tile,1.02808,1.02784,1.04021,1.03816,1.06048,1.04916,1.05818,1.0598,0.9916,1.04915,1.05608,1.07136,1.09676,1.0624,1.05065,1.05219
+visits_per_tile_outliers,0.0439,0.06807,0.10641,0.15354,0.1521,0.21632,0.11355,0.15049,0.04571,0.13555,0.09137,0.35189,0.37264,0.45482,0.54039,0.30458
+visits_per_tile_quartiles,0.60031,0.65612,0.68699,0.61568,0.72515,0.73439,0.75051,0.72631,0.54706,0.77627,0.71145,0.79594,0.97962,0.99221,0.94517,0.90416
+visits_per_time_tile,0.97073,0.99841,0.99784,1.00189,1.00586,1.00533,1.0036,1.01078,0.92423,0.98329,1.00408,0.99935,1.00796,1.01483,1.01517,1.0088
