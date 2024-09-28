@@ -4,5 +4,5 @@ BERLIN = "berlin"
 
 DATASET_NAMES = [GEOLIFE, MADRID,BERLIN]
 PROCESSED_DATA_PATH = "data"
-REPORT_PATH = "reports"
-OUTPUT_PATH = "delta_results"
+REPORT_PATH = "oldResults/reports"
+OUTPUT_PATH = "paper_results"

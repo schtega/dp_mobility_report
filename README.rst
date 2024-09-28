@@ -1,7 +1,30 @@
+===========================================================================================
+Differentially Private Mobility Report (DpMobilityReport) - now with the Gaussian Mechanism
+===========================================================================================
+This project extends the DpMobilityReport with the option on using the Gaussian Mechanism.
+The basic functionality is still the same. Therefore for this basic functionality please have a look at the original README, repository and documentation, where this project is forked from.
+
+The Gaussian Mechanism provides better utility when combining multiple analyses.
+This was shown in our paper. To reproduce the findings of the paper please run compute_smape.py in the evaluation folder.
+To reproduce the graphs run createGraphs.py
+
+To use the implementation of the Gaussian Mechanism the following parameters were added:
+
+* The parameter ``gaussian`` defines the mechanism that will be used. If set to true the Gaussian Mechanism will be used. The default value is false, and respectively the Laplace mechanism will be used like
+* The parameter ``delta`` defines the delta value of epsilon-delta differential privacy. (Commonly said "the risk of not achieving e differential privacy
+* The parameter ``evalu_analysis_selection_count`` is used for evaluation to simulate the amount selected analyses to evaluate the privacy splitting. This reduces runtime  because not all analyses have to be actually computed.
+
+Benchmarkreport
+The same new parameters are added to the Benchmark report as well.
+
+* The parameters ``gaussian`` and ``gaussian_alternative`` for the comparison.
+* The parameters ``delta`` and ``delta_alternative`` for the comparison.
+* The parameters ``evalu_analysis_selection_count`` and ``evalu_analysis_selection_count_alternative`` for the comparison.
+
+
 ============================================================
 Differentially Private Mobility Report (DpMobilityReport)
 ============================================================
-
 
 .. image:: https://img.shields.io/pypi/v/dp_mobility_report.svg
         :target: https://pypi.python.org/pypi/dp_mobility_report

@@ -7,7 +7,7 @@ prefix = 'tables/'
 datasets = ['berlin/berlin', 'geolife/geolife', 'madrid/madrid']
 dataset_names = ['berlin', 'geolife', 'madrid']
 topics = ['overview', 'place']
-store_folder = 'updated_graphs_22'
+store_folder = 'updated_graphs'
 fontsize = 22
 
 # Define a consistent figure size
